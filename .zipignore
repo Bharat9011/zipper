@@ -1,0 +1,28 @@
+# Version Control
+.git/
+.gitignore
+
+# Zipper
+.zipignore
+*.zip
+# OS Generated
+.DS_Store
+Thumbs.db
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.iml
+# Imported from .gitignore
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+# Dart/Flutter
+build/
+pubspec.lock
+coverage/
+android/app/build/
+ios/Flutter/App.framework
+ios/Pods/
+.flutter-plugins
+.flutter-plugins-dependencies

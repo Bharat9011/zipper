@@ -1,0 +1,7 @@
+to zip
+
+zipper zip . -o my_backup.zip
+
+to unzip
+
+zipper.exe unzip my_backup.zip -o output_folder_name
