@@ -1,0 +1,33 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Run tests
+        run: dart test
+
+      - name: Compile Executable
+        run: dart compile exe bin/zipper.dart -o build/zipper.exe
+
+      - name: Upload Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: zipper-windows
+          path: build/zipper.exe
