@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 class IgnoreGenerator {
-  Future<String> generate(Directory dir) async {
+  static Future<String> generate(Directory dir) async {
     final ignores = <String>{};
 
     // 1. Essential Defaults (Always ignore these)
@@ -13,7 +13,7 @@ class IgnoreGenerator {
       '',
       '# Zipper',
       '.zipignore',
-      '*.zip', // Don't zip other zip files by default? Maybe.
+      '*.zip', // Don't zip other zip files by default
       '',
       '# OS Generated',
       '.DS_Store',
@@ -66,7 +66,7 @@ class IgnoreGenerator {
     }
 
     // Java/Gradle
-    if (await File(p.join(dir.path, 'pom.xml')).exists() || 
+    if (await File(p.join(dir.path, 'pom.xml')).exists() ||
         await File(p.join(dir.path, 'build.gradle')).exists()) {
       ignores.addAll([
         '# Java/Gradle',
@@ -78,19 +78,19 @@ class IgnoreGenerator {
         '*.war',
       ]);
     }
-    
+
     // Python
-    if (await File(p.join(dir.path, 'requirements.txt')).exists() || 
+    if (await File(p.join(dir.path, 'requirements.txt')).exists() ||
         await File(p.join(dir.path, 'pyproject.toml')).exists()) {
-       ignores.addAll([
-         '# Python',
-         '__pycache__/',
-         '*.py[cod]',
-         'venv/',
-         '.env',
-         '.venv/',
-         'env/',
-       ]);
+      ignores.addAll([
+        '# Python',
+        '__pycache__/',
+        '*.py[cod]',
+        'venv/',
+        '.env',
+        '.venv/',
+        'env/',
+      ]);
     }
 
     return ignores.join('\n');

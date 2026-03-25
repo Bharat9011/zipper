@@ -26,7 +26,6 @@ class ZipCommand extends Command {
     final args = argResults!;
     final verbose = args['verbose'] as bool;
     final dryRun = args['dry-run'] as bool;
-    final outputName = args['output'] as String?;
 
     if (args.rest.isEmpty) {
       printUsage();
@@ -48,8 +47,7 @@ class ZipCommand extends Command {
     final zipIgnoreFile = File(p.join(sourceDir.path, '.zipignore'));
     if (!await zipIgnoreFile.exists()) {
       logger.info('No .zipignore found. Generating one...');
-      final generator = IgnoreGenerator();
-      final content = await generator.generate(sourceDir);
+      final content = await IgnoreGenerator.generate(sourceDir);
       await zipIgnoreFile.writeAsString(content);
       logger.success(
         'Created .zipignore from defaults and .gitignore (if present).',
@@ -65,8 +63,7 @@ class ZipCommand extends Command {
       await zipEngine.preview(sourceDir);
     } else {
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final projectName = p.basename(sourceDir.path);
-      final fileName = outputName ?? '${projectName}_$timestamp.zip';
+      final fileName = 'myZipper_$timestamp.zip';
       final outputFile = File(fileName);
 
       await zipEngine.zip(sourceDir, outputFile);

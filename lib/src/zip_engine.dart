@@ -12,7 +12,7 @@ class ZipEngine {
 
   Future<void> zip(Directory sourceDir, File outputFile) async {
     _logger.info('Scanning files in ${sourceDir.path}...');
-    
+
     final encoder = ZipFileEncoder();
     encoder.create(outputFile.path);
 
@@ -23,7 +23,7 @@ class ZipEngine {
       await encoder.addFile(file, relativePath);
       count++;
     }
-    
+
     encoder.close();
     _logger.info(''); // New line after progress
     _logger.success('Successfully zipped $count files to ${outputFile.path}');
@@ -31,7 +31,7 @@ class ZipEngine {
 
   Future<void> preview(Directory sourceDir) async {
     _logger.info('Previewing files to be zipped in ${sourceDir.path}:');
-    
+
     int count = 0;
     int totalSize = 0;
 

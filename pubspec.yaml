@@ -1,7 +1,7 @@
 name: zipper
 description: A sample command-line application.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/Bharat9011/zipper
 
 environment:
   sdk: ^3.9.2

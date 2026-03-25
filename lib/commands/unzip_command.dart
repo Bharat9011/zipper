@@ -38,7 +38,7 @@ class UnzipCommand extends Command {
     final unzipEngine = UnzipEngine(logger);
 
     final outputDir = Directory(outputDirName ?? '.');
-    
+
     await unzipEngine.unzip(zipFile, outputDir);
   }
 }
