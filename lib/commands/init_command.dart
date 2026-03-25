@@ -7,10 +7,15 @@ class InitCommand extends Command {
   @override
   final String name = 'init';
   @override
-  final String description = 'Generates a default .zipignore file based on project type.';
+  final String description =
+      'Generates a default .zipignore file based on project type.';
 
   InitCommand() {
-    argParser.addFlag('force', abbr: 'f', help: 'Overwrite existing .zipignore file.');
+    argParser.addFlag(
+      'force',
+      abbr: 'f',
+      help: 'Overwrite existing .zipignore file.',
+    );
   }
 
   @override
@@ -25,9 +30,8 @@ class InitCommand extends Command {
       return;
     }
 
-    final generator = IgnoreGenerator();
-    final content = await generator.generate(Directory.current);
-    
+    final content = await IgnoreGenerator.generate(Directory.current);
+
     await file.writeAsString(content);
     logger.success('Generated .zipignore file.');
   }

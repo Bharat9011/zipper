@@ -15,56 +15,53 @@ jobs:
         include:
           - os: ubuntu-latest
             build-cmd: linux
-            binary-ext: "" # Linux binaries have no extension
+            binary-ext: ""
           - os: macos-latest
             build-cmd: macos
-            binary-ext: "" # macOS binaries have no extension
+            binary-ext: ""
           - os: windows-latest
             build-cmd: windows
-            binary-ext: ".exe" # Windows binaries need .exe
+            binary-ext: ".exe"
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # This action installs BOTH Flutter and Dart.
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter (Includes Dart)
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Install Linux dependencies
+      - name: Install Linux Dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y ninja-build libgtk-3-dev
 
-      - name: Enable desktop support
+      - name: Enable Desktop Support
         run: |
           flutter config --enable-linux-desktop
           flutter config --enable-macos-desktop
           flutter config --enable-windows-desktop
 
-      # Switched to flutter pub get
-      - name: Install dependencies
+      - name: Install Dependencies
         run: flutter pub get
 
-      # Switched to flutter test to support UI widget testing
-      - name: Run tests
+      - name: Run Tests
         run: flutter test
 
       - name: Build Desktop App
         run: flutter build ${{ matrix.build-cmd }} --release
 
-      # Now uses the matrix variable to name the file correctly per OS
-      - name: Compile Executable
+      - name: Compile Executable Tool
         run: dart compile exe bin/zipper.dart -o build/zipper${{ matrix.binary-ext }}
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: universal-video-downloader-${{ matrix.os }}
-          # Updated to grab BOTH the Flutter app and your compiled Dart CLI tool
           path: |
             build/**/release/
             build/zipper${{ matrix.binary-ext }}
