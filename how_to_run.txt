@@ -1,0 +1,7 @@
+to unzip without output folder providing
+
+dart bin/zipper.dart unzip 20260325_220309.zip
+
+to zip project
+
+dart bin/zipper.dart zip .

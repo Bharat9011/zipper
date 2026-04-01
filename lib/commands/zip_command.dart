@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:args/command_runner.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import '../src/ignore_handler.dart';
 import '../src/ignore_generator.dart';
@@ -62,8 +61,7 @@ class ZipCommand extends Command {
     if (dryRun) {
       await zipEngine.preview(sourceDir);
     } else {
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final fileName = 'myZipper_$timestamp.zip';
+      final fileName = '${sourcePath.split("\\").last}.zip';
       final outputFile = File(fileName);
 
       await zipEngine.zip(sourceDir, outputFile);

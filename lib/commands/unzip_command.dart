@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:args/command_runner.dart';
 import '../src/logger.dart';
+import 'package:path/path.dart' as p;
 import '../src/unzip_engine.dart';
 
 class UnzipCommand extends Command {
   @override
   final String name = 'unzip';
+
   @override
   final String description = 'Extracts a zip archive.';
 
@@ -22,7 +24,7 @@ class UnzipCommand extends Command {
     final outputDirName = args['output'] as String?;
 
     if (args.rest.isEmpty) {
-      printUsage();
+      print('Usage: unzip <zip-file> [-o output_dir]');
       return;
     }
 
@@ -37,8 +39,25 @@ class UnzipCommand extends Command {
     final logger = Logger(verbose: verbose);
     final unzipEngine = UnzipEngine(logger);
 
-    final outputDir = Directory(outputDirName ?? '.');
+    final outputDir =
+        outputDirName ??
+        p.join(
+          Directory.current.path,
+          zipFile.path.split("\\").last.replaceAll(".zip", ""),
+        );
 
-    await unzipEngine.unzip(zipFile, outputDir);
+    final outputPath = Directory(outputDir);
+
+    // ✅ Ensure output directory exists
+    if (!await outputPath.exists()) {
+      await outputPath.create(recursive: true);
+    }
+
+    try {
+      await unzipEngine.unzip(zipFile, outputPath);
+    } catch (e) {
+      logger.error('Unzip failed: $e');
+      exit(1);
+    }
   }
 }
