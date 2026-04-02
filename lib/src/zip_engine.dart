@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:archive/archive_io.dart';
+import 'package:archive/archive.dart';
 import 'package:path/path.dart' as p;
 import 'scanner.dart';
 import 'logger.dart';
@@ -14,22 +14,31 @@ class ZipEngine {
     try {
       _logger.info('Scanning files in ${sourceDir.path}...');
 
-      final encoder = ZipFileEncoder();
-      encoder.create(outputFile.path);
-
+      final archive = Archive();
       int count = 0;
+
       await for (final file in _scanner.scan(sourceDir)) {
         final relativePath = p.relative(file.path, from: sourceDir.path);
         _logger.progress('Zipping: $relativePath');
-        await encoder.addFile(file, relativePath);
+
+        final bytes = await file.readAsBytes();
+
+        archive.addFile(ArchiveFile(relativePath, bytes.length, bytes));
+
         count++;
       }
 
-      encoder.close();
+      final zipData = ZipEncoder().encode(archive);
+
+      if (zipData != null) {
+        await outputFile.writeAsBytes(zipData);
+      }
+
       _logger.info('');
       _logger.success('Successfully zipped $count files to ${outputFile.path}');
     } catch (e) {
       _logger.error('Failed to zip files: $e');
+      exit(1);
     }
   }
 
@@ -54,5 +63,29 @@ class ZipEngine {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  Future<void> zipSingleFile(File file, File outputFile) async {
+    try {
+      _logger.info('Zipping single file: ${file.path}');
+
+      final archive = Archive();
+
+      final bytes = await file.readAsBytes();
+      final fileName = p.basename(file.path);
+
+      archive.addFile(ArchiveFile(fileName, bytes.length, bytes));
+
+      final zipData = ZipEncoder().encode(archive);
+
+      if (zipData != null) {
+        await outputFile.writeAsBytes(zipData);
+      }
+
+      _logger.success('Zipped 1 file to ${outputFile.path}');
+    } catch (e) {
+      _logger.error('Failed to zip file: $e');
+      exit(1);
+    }
   }
 }

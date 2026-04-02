@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
 import 'logger.dart';
 
@@ -32,7 +33,13 @@ class UnzipEngine {
       _logger.info('Total files: ${archive.length}');
 
       for (final file in archive) {
-        final filename = file.name;
+        var filename = file.name;
+
+        // 🔥 Convert to relative path only
+        filename = p.normalize(filename);
+
+        // remove leading slash if exists
+        filename = filename.replaceFirst(RegExp(r'^[/\\]+'), '');
         final destPath = p.normalize(p.join(outputDir.path, filename));
 
         if (!p.isWithin(outputDir.path, destPath)) {
@@ -48,8 +55,9 @@ class UnzipEngine {
           }
 
           try {
-            await outFile.writeAsBytes(file.content as List<int>);
-            _logger.progress('Extracted: $filename');
+            final data = file.content as List<int>;
+            await outFile.writeAsBytes(data, flush: true);
+            _logger.info('Extracted: ${p.join(outputDir.path, filename)}');
           } catch (e) {
             _logger.error('Write failed: $filename → $e');
           }
@@ -61,7 +69,7 @@ class UnzipEngine {
       _logger.success('Extraction complete ✅');
     } catch (e) {
       _logger.error('Unzip failed: $e');
-      rethrow;
+      exit(1);
     }
   }
 }
