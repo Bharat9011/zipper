@@ -76,15 +76,27 @@ class ZipCommand extends Command {
     } else {
       final outputOption = args['output'] as String?;
 
-      final name =
-          outputOption ??
-          p.basename(
-            sourcePath == '.'
-                ? Directory.current.path
-                : p.normalize(sourcePath),
-          );
+String name;
 
-      final outputFile = File('$name.zip');
+if (outputOption != null) {
+  name = outputOption;
+} else {
+  name = p.basename(
+    sourcePath == '.'
+        ? Directory.current.path
+        : p.normalize(sourcePath),
+  );
+
+  // ✅ FIX: remove .zip if already present
+  if (name.toLowerCase().endsWith('.zip')) {
+    name = name.substring(0, name.length - 4);
+  }
+}
+
+// ✅ Ensure final file always ends with .zip
+final outputFile = name.toLowerCase().endsWith('.zip')
+    ? File(name)
+    : File('$name.zip');
       if (isFile) {
         await zipEngine.zipSingleFile(File(sourcePath), outputFile);
       } else {

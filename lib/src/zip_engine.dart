@@ -41,24 +41,64 @@ class ZipEngine {
       exit(1);
     }
   }
+Future<void> preview(Directory sourceDir) async {
+  _logger.info('Preview (tree view) for ${sourceDir.path}:\n');
 
-  Future<void> preview(Directory sourceDir) async {
-    _logger.info('Previewing files to be zipped in ${sourceDir.path}:');
+  final tree = <String, dynamic>{};
+  int totalFiles = 0;
+  int totalSize = 0;
 
-    int count = 0;
-    int totalSize = 0;
+  await for (final file in _scanner.scan(sourceDir)) {
+    final relativePath = p.relative(file.path, from: sourceDir.path);
+    final parts = relativePath.split(p.separator);
 
-    await for (final file in _scanner.scan(sourceDir)) {
-      final relativePath = p.relative(file.path, from: sourceDir.path);
-      final size = await file.length();
-      _logger.info('- $relativePath (${_formatSize(size)})');
-      count++;
-      totalSize += size;
+    int size = await file.length();
+    totalSize += size;
+    totalFiles++;
+
+    Map<String, dynamic> current = tree;
+
+    for (int i = 0; i < parts.length; i++) {
+      final part = parts[i];
+
+      if (i == parts.length - 1) {
+        current[part] = size; // file with size
+      } else {
+        current = current.putIfAbsent(part, () => <String, dynamic>{});
+      }
     }
-
-    _logger.info('Total: $count files, ${_formatSize(totalSize)}');
   }
 
+  _printTree(tree, '');
+
+  _logger.info(
+      '\nTotal: $totalFiles files, ${_formatSize(totalSize)}');
+}
+void _printTree(Map<String, dynamic> tree, String indent) {
+ final keys = tree.keys.toList()
+  ..sort((a, b) {
+    final aIsDir = tree[a] is Map;
+    final bIsDir = tree[b] is Map;
+    if (aIsDir && !bIsDir) return -1;
+    if (!aIsDir && bIsDir) return 1;
+    return a.compareTo(b);
+  });
+
+  for (int i = 0; i < keys.length; i++) {
+    final key = keys[i];
+    final value = tree[key];
+
+    final isLast = i == keys.length - 1;
+    final branch = isLast ? '└── ' : '├── ';
+
+    if (value is Map<String, dynamic>) {
+      _logger.info('$indent$branch$key/');
+      _printTree(value, indent + (isLast ? '    ' : '│   '));
+    } else {
+      _logger.info('$indent$branch$key (${_formatSize(value)})');
+    }
+  }
+}
   String _formatSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
