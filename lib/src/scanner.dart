@@ -14,7 +14,12 @@ class Scanner {
       throw FileSystemException('Directory not found', dir.path);
     }
 
-    await for (final entity in dir.list(recursive: true, followLinks: false)) {
+    await for (final entity in dir.list(
+  recursive: true,
+  followLinks: false,
+).handleError((e) {
+  _logger.log('Skipped inaccessible path: $e');
+})) {
       if (entity is File) {
         final relativePath = p.relative(entity.path, from: dir.path);
         if (!_ignoreHandler.shouldIgnore(relativePath)) {

@@ -12,6 +12,10 @@ class IgnoreHandler {
     '.idea/**',
     '**/*.log',
     '**/.DS_Store',
+
+     // ✅ ADD THESE
+  'System Volume Information/**',
+  '\$RECYCLE.BIN/**',
   ];
 
   IgnoreHandler([List<String>? extraIgnores]) {
